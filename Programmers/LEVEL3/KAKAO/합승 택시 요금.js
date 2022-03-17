@@ -2,40 +2,33 @@ function solution(n, s, a, b, fares) {
     let answer = Infinity;
     const graph = Array(n + 1)
         .fill(false)
-        .map(() => Array(n + 1).fill(0));
+        .map(() => Array(n + 1).fill(Infinity));
     fares.forEach(([a, b, cost]) => {
         graph[a][b] = cost;
         graph[b][a] = cost;
     });
-    const toA = [];
-    const toB = [];
-    const queue = [[s, 0, [s]]];
-    while (queue.length) {
-        const [start, cost, root] = queue.shift();
-        if (start === a) {
-            toA.push([cost, root]);
-        }
-        if (start === b) {
-            toB.push([cost, root]);
-        }
-        for (let to = 0; to <= n; to++) {
-            if (graph[start][to] !== 0 && root.indexOf(to) === -1) {
-                queue.push([to, cost + graph[start][to], [...root, to]]);
+
+    for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <= n; j++) {
+            for (let k = 1; k <= n; k++) {
+                graph[j][k] = Math.min(graph[i][j] + graph[i][k], graph[j][k]);
             }
         }
     }
-    toA.sort((a, b) => a[0] - b[0]);
-    toB.sort((a, b) => a[0] - b[0]);
-    for (let ia = 0; ia < toA.length; ia++) {
-        for (let ib = 0; ib < toB.length; ib++) {
-            let cost = toA[ia][0] + toB[ib][0];
-            for (let i = 1; i < toA[ia][1].length; i++) {
-                if (toA[ia][1][i] === toB[ib][1][i]) {
-                    cost -= graph[toA[ia][1][i]][toA[ia][1][i - 1]];
-                }
-            }
-            answer = Math.min(answer, cost);
+    for (let i = 1; i <= n; i++) {
+        let common = 0;
+        let toA = 0;
+        let toB = 0;
+        if (i !== s) {
+            common = graph[s][i];
         }
+        if (i !== a) {
+            toA = graph[i][a];
+        }
+        if (i !== b) {
+            toB = graph[i][b];
+        }
+        answer = Math.min(answer, common + toA + toB);
     }
     return answer;
 }
@@ -73,3 +66,12 @@ console.log(
         [4, 3, 9],
     ])
 ); // 18
+[
+    [Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity],
+    [Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity],
+    [Infinity, Infinity, 12, 13, 8, 12, 6],
+    [Infinity, Infinity, 13, 14, 9, 18, 7],
+    [Infinity, Infinity, 8, 9, 14, 18, 7],
+    [Infinity, Infinity, 12, 18, 18, 22, 11],
+    [Infinity, Infinity, 6, 7, 7, 11, 12],
+];
